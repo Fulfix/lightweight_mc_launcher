@@ -43,7 +43,7 @@ int write_rt(char **access_token){// you have to free access_token your self
   devicecode = parse_json(r->body.data, 7);
   usercode = parse_json(r->body.data, 3);
   if (!devicecode || !usercode) { ret = 1; goto cleanup;}
-  printf("%s\n", usercode);
+  printf("go to https://microsoft.com/link and paste this code: %s\n", usercode);
 
   for (;;) {
     reslt_pol = polling_req(devicecode);
