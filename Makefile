@@ -1,4 +1,8 @@
+CC = gcc
+CC_WIN = x86_64-w64-mingw32-gcc
+
 all:
-	gcc mc_launcher.c -o mc_launcher -lssl -lcrypto
+	$(CC) mc_launcher.c -o mc_launcher -lssl -lcrypto
+
 windows:
-	gcc mc_launcher.c -o mc_launcher -lssl -lcrypto -D_WIN32
+	$(CC_WIN) mc_launcher.c -o mc_launcher.exe -lssl -lcrypto -lws2_32

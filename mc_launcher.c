@@ -1,8 +1,14 @@
-#define REQUESTS_IMPLEMENTATION 
+#define REQUESTS_IMPLEMENTATION
+#ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
 #include "requests.h"
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include "mc_requests.h"
 #include "config.h"
@@ -74,7 +80,11 @@ int write_rt(char **access_token){// you have to free access_token your self
     free(token_type); token_type = NULL;
     free_response(reslt_pol); reslt_pol = NULL;
 
+#ifdef _WIN32
+    Sleep(5 * 1000);
+#else
     sleep(5);
+#endif
   }
   *access_token = parse_json(reslt_pol->body.data, 15);
   refresh_token = parse_json(reslt_pol->body.data, 19);
@@ -93,7 +103,6 @@ cleanup:
   return ret;
 }
 int main() {
-  extern char **environ;
   int ret = 0, len = 0;
   char *rt = NULL, *mcslop_token = NULL, *mc_token = NULL, *user_name = NULL, *uuid = NULL;
   char *userhash = NULL, *xbl = NULL, *xsts = NULL;
@@ -161,7 +170,12 @@ int main() {
   cmd[idx_username] = user_name;
   cmd[idx_uuid] = uuid;
   cmd[idx_token] = mc_token;
+#ifdef _WIN32
+  _execve(cmd[0], cmd, (const char *const *)_environ);
+#else
+  extern char **environ;
   execve(cmd[0], cmd, environ);
+#endif
 
 cleanup:
 #ifdef _WIN32
