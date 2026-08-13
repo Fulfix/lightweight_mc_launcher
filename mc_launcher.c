@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "mc_requests.h"
+#include "config.h"
 
 char *parse_json(char *str, int quotes){
   int j, i, len, idx;
@@ -91,7 +92,8 @@ cleanup:
   free(refresh_token);
   return ret;
 }
-int main(void) {
+int main() {
+  extern char **environ;
   int ret = 0, len = 0;
   char *rt = NULL, *mcslop_token = NULL, *mc_token = NULL, *user_name = NULL, *uuid = NULL;
   char *userhash = NULL, *xbl = NULL, *xsts = NULL;
@@ -113,6 +115,7 @@ int main(void) {
     r = rt_req(rt);
     if (!r) { ret = 1; goto cleanup; }
 
+    free(rt);
     rt = parse_json(r->body.data, 19);
     mcslop_token = parse_json(r->body.data, 15);
     if (!rt || !mcslop_token) { ret = 1; goto cleanup;}
@@ -147,9 +150,14 @@ int main(void) {
   if (!r) { ret = 1;goto cleanup;}
   user_name = parse_json(r->body.data, 7);
   uuid = parse_json(r->body.data, 3);
-  printf("token :%s\n", mc_token);
-  printf("name :%s\n", user_name);
-  printf("uuid :%s\n", uuid);
+  printf("user name: %s\n", user_name);
+  printf("uuid: %s\n", uuid);
+  printf("token: %s\n", mc_token);
+
+  cmd[idx_username] = user_name;
+  cmd[idx_uuid] = uuid;
+  cmd[idx_token] = mc_token;
+  execve(cmd[0], cmd, environ);
 
 cleanup:
   free(mcslop_token); 
