@@ -32,18 +32,32 @@ char *parse_json(char *str, int quotes){
 
   return ret;
 }
+void print_json(char *str, int quotes){
+  int i,j;
+  j = 0; // j represent the number of quotes
+  for (i = 0; j != quotes; i++){
+    if (str[i] == '"'){
+      j++;
+    }
+  }
+  printf("go to https://microsoft.com/link and paste this code: ");
+  while(str[i] != '"')
+    printf("%c", str[i++]);
+  printf("\n");
+
+
+}
 int write_rt(char **access_token){// you have to free access_token your self
   int ret = 0;
   struct response *r = NULL, *reslt_pol = NULL;
-  char *devicecode = NULL, *usercode = NULL, *token_type = NULL, *refresh_token = NULL;
+  char *devicecode = NULL, *token_type = NULL, *refresh_token = NULL;
   FILE *fd;
 
   r = first_req();
   if(!r) { ret = 1; goto cleanup;}
   devicecode = parse_json(r->body.data, 7);
-  usercode = parse_json(r->body.data, 3);
-  if (!devicecode || !usercode) { ret = 1; goto cleanup;}
-  printf("go to https://microsoft.com/link and paste this code: %s\n", usercode);
+  print_json(r->body.data, 3);
+  if (!devicecode) { ret = 1; goto cleanup;}
 
   for (;;) {
     reslt_pol = polling_req(devicecode);
@@ -73,7 +87,6 @@ cleanup:
   free_response(r);
   free_response(reslt_pol);
   free(devicecode);
-  free(usercode);
   free(token_type);
   free(refresh_token);
   return ret;
@@ -103,7 +116,7 @@ int main(void) {
     rt = parse_json(r->body.data, 19);
     mcslop_token = parse_json(r->body.data, 15);
     if (!rt || !mcslop_token) { ret = 1; goto cleanup;}
-    free_response(r); r = NULL;
+    free_response(r);
 
     fp = fopen("refresh_token.txt", "w");
     if (fp == NULL) { ret = 1; goto cleanup;}
@@ -116,17 +129,19 @@ int main(void) {
   xbl = parse_json(r->body.data, 11);
   userhash = parse_json(r->body.data, 19);
   if (!xbl || !userhash) { ret = 1; goto cleanup;}
-  free_response(r); r = NULL;
+  free_response(r);
+
   r = get_xsts(xbl);
   if (!r) { ret = 1; goto cleanup;}
   xsts = parse_json(r->body.data, 11);
   if (!xsts) { ret = 1; goto cleanup;}
-  free_response(r); r = NULL;
+  free_response(r);
+
   r = get_mc_token(xsts, userhash);
   if (!r) { ret = 1; goto cleanup;}
   mc_token = parse_json(r->body.data, 7);
   if (!mc_token) { mc_token = NULL;}
-  free_response(r); r = NULL;
+  free_response(r);
 
   r = get_user_info(mc_token);
   if (!r) { ret = 1;goto cleanup;}
@@ -138,13 +153,13 @@ int main(void) {
 
 cleanup:
   free(mcslop_token); 
-  free(rt);
   free_response(r);
-  free(mc_token);
   free(user_name);
-  free(uuid);
+  free(mc_token);
   free(userhash);
-  free(xbl);
   free(xsts);
+  free(uuid);
+  free(xbl);
+  free(rt);
   return ret;
 }
