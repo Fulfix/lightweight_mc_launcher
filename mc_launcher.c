@@ -99,6 +99,10 @@ int main() {
   char *userhash = NULL, *xbl = NULL, *xsts = NULL;
   struct response *r = NULL;
   FILE *fp;
+#ifdef _WIN32
+  WSADATA wsa;
+  WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
   fp = fopen("refresh_token.txt", "r");
   if (fp == NULL){
     if (write_rt(&mcslop_token)) { ret = 1; goto cleanup;}
@@ -160,6 +164,9 @@ int main() {
   execve(cmd[0], cmd, environ);
 
 cleanup:
+#ifdef _WIN32
+  WSACleanup();
+#endif
   free(mcslop_token); 
   free_response(r);
   free(user_name);
