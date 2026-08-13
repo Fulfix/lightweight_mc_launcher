@@ -24,8 +24,7 @@ print(sys.argv)
 - replace `[]` by `{}`
 
 ## Compilation
-for now it just works on Linux
-run inside the repo's directory:
+inside the repo's directory execute:
 ```
 make
 ```
