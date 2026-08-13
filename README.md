@@ -28,7 +28,10 @@ inside the repo's directory execute:
 ```
 make
 ```
+otherwise if your on windows execute:
+```
+make windows
+```
 # TODO
 
 - check the content of the requests
-- add windows support
